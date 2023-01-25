@@ -1,6 +1,7 @@
 const Ethers = require("ethers");
 require('dotenv').config()
 const { INFURA_PROJECT_ID, INFURA_SECRET } = process.env
+const { getCardName } = require('./format')
 
 // set up provider
 const provider = new Ethers.providers.InfuraProvider("homestead", {
@@ -18,11 +19,9 @@ const OPENSEA_SEAPORT_CONTRACT = "0x00000000006c3852cbef3e08e8df289169ede581"
 const seaportAbi = require("../abis/SeaPort.json");
 const seaportContract = new Ethers.Contract(OPENSEA_SEAPORT_CONTRACT, seaportAbi, provider);
 
-const CURIO_WRAPPER_CONTRACT = "0x73da73ef3a6982109c4d5bdb0db9dd3e3783f313";
-const CURIO_17B_WRAPPER_CONTRACT = "0x04afa589e2b933f9463c5639f412b183ec062505";
-const curioAbi = require("../abis/CurioERC1155Wrapper.json");
-const curioContract = new Ethers.Contract(CURIO_WRAPPER_CONTRACT, curioAbi, provider);
-const curio17bContract = new Ethers.Contract(CURIO_17B_WRAPPER_CONTRACT, curioAbi, provider);
+const PEPERIUM_WRAPPER_CONTRACT = "0xfe880206214856f984d4f64fc89c26681dca15a2";
+const peperiumAbi = require("../abis/PeperiumERC1155Wrapper.json");
+const peperiumContract = new Ethers.Contract(PEPERIUM_WRAPPER_CONTRACT, peperiumAbi, provider);
 
 const LOOKSRARE_CONTRACT = "0x59728544b08ab483533076417fbbb2fd0b17ce3a"
 const looksAbi = require("../abis/LooksRare.json");
@@ -36,32 +35,20 @@ const getEthUsdPrice = async () => await uniswapContract()
 	.then(contract => contract.getReserves())
 	.then(reserves => Number(reserves._reserve0) / Number(reserves._reserve1) * 1e12); // times 10^12 because usdc only has 6 decimals
 
-const curioEventFilter = {
-	address: CURIO_WRAPPER_CONTRACT,
-	topics: [
-		Ethers.utils.id("TransferSingle(address,address,address,uint256,uint256)")
-	]
-};
-
-const curio17bEventFilter = {
-	address: CURIO_17B_WRAPPER_CONTRACT,
+const peperiumEventFilter = {
+	address: PEPERIUM_WRAPPER_CONTRACT,
 	topics: [
 		Ethers.utils.id("TransferSingle(address,address,address,uint256,uint256)")
 	]
 };
 
 // this is a helper for the unit test
-async function getCurioEventsFromBlock(blockNum) {
-	return await curioContract.queryFilter(curioEventFilter, fromBlock=blockNum, toBlock=blockNum);
-}
-
-// this is a helper for the unit test
-async function getCurio17bEventsFromBlock(blockNum) {
-	return await curio17bContract.queryFilter(curio17bEventFilter, fromBlock=blockNum, toBlock=blockNum);
+async function getPeperiumEventsFromBlock(blockNum) {
+	return await peperiumContract.queryFilter(peperiumEventFilter, fromBlock=blockNum, toBlock=blockNum);
 }
 
 let lastTx;
-async function handleCurioTransfer(tx) {
+async function handlePeperiumTransfer(tx) {
 	let txReceipt = await provider.getTransactionReceipt(tx.transactionHash);
 	if (lastTx === tx.transactionHash) return {}; // Transaction already seen
 	lastTx = tx.transactionHash
@@ -173,7 +160,7 @@ async function handleCurioTransfer(tx) {
 
 	
 	curioLogRaw = txReceipt.logs.filter(x => {
-		return [CURIO_WRAPPER_CONTRACT, CURIO_17B_WRAPPER_CONTRACT].includes(x.address.toLowerCase())
+		return [PEPERIUM_WRAPPER_CONTRACT].includes(x.address.toLowerCase())
 	});
 
 	if (curioLogRaw.length === 0) {
@@ -188,7 +175,7 @@ async function handleCurioTransfer(tx) {
 	let sellers = []
 	
 	for (let log of curioLogRaw) {
-		curioLog = curioContract.interface.parseLog(log);
+		curioLog = peperiumContract.interface.parseLog(log);
 		// which card was transferred?
 		let qty = curioLog.args._value.toNumber();
 		let card = curioLog.args._id.toString();
@@ -203,25 +190,14 @@ async function handleCurioTransfer(tx) {
 	seller = (sellers.every((val, i, arr) => val === arr[0])) ? sellers[0] : seller = "Multiple" // Check if multiple sellers, if so, seller is "Multiple" instead of a single seller
 	let sales = []
 	for ( const [card, qty] of Object.entries(data)) {
-		sales.push(`${qty}x CRO${card}`)
+		sales.push(`${qty}x ${getCardName(card)}`)
 	}
-	console.log(`Found curio sale: ${sales.join(", ")} sold for ${totalPrice} ${token}`)
+	console.log(`Found sale: ${sales.join(", ")} sold for ${totalPrice} ${token}`)
 	return { data, totalPrice, buyer, seller, ethPrice, token, platforms };
 }
 
 function watchForTransfers(transferHandler) {
-	provider.on(curioEventFilter, async (log) => {
-		try {
-			const transfer = await handleCurioTransfer(log);
-			if (transfer.data) {
-				transferHandler(transfer);
-			}
-		} catch (e) {
-			console.error(e);
-		}
-	});
-
-	provider.on(curio17bEventFilter, async (log) => {
+	provider.on(peperiumEventFilter, async (log) => {
 		try {
 			const transfer = await handleCurioTransfer(log);
 			if (transfer.data) {
@@ -233,4 +209,4 @@ function watchForTransfers(transferHandler) {
 	});
 }
 
-module.exports = { watchForTransfers, handleCurioTransfer, getCurioEventsFromBlock, getCurio17bEventsFromBlock };
+module.exports = { watchForTransfers, handlePeperiumTransfer, getPeperiumEventsFromBlock };

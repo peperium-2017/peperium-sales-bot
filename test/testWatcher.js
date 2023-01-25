@@ -1,4 +1,4 @@
-const { handleCurioTransfer, getCurioEventsFromBlock, getCurio17bEventsFromBlock } = require("../utils/watcher.js");
+const { handlePeperiumTransfer, getPeperiumEventsFromBlock } = require("../utils/watcher.js");
 const { getUsername } = require("../utils/opensea");
 
 const assert = require("assert");
@@ -6,116 +6,37 @@ const assert = require("assert");
 describe("Watcher", function () {
 	this.timeout(10_000);
 
-	describe("handleCurioTransfer()", function () {
-		it("should correctly find the single card 10 transfer in block 14516246", async function () {
-			const events = await getCurioEventsFromBlock(14516246);
+	describe("handlePeperiumTransfer()", function () {
+		it("should correctly find the single UNDEADPEPE transfer in block 16481215", async function () {
+			const events = await getPeperiumEventsFromBlock(16481215);
 			assert.equal(events.length, 1);
 
-			const transfer = await handleCurioTransfer(events[0])
-			assert.deepEqual(transfer.data, {"10": 1})
-			assert.equal(transfer.totalPrice, 0.3);
-		});
-
-		it("should correctly find the 5x card 11 transfer in block 14268794", async function () {
-			const events = await getCurioEventsFromBlock(14268794);
-			assert.equal(events.length, 1);
-
-			const transfer = await handleCurioTransfer(events[0])
-			assert.deepEqual(transfer.data, {"11": 5});
-			assert.equal(transfer.totalPrice, 2);
-		});
-
-		it("should correctly find the 1x card transfer 17b in block 15877962", async function () {
-			const events = await getCurio17bEventsFromBlock(15877962);
-			assert.equal(events.length, 1);
-
-			const transfer = await handleCurioTransfer(events[0])
-			assert.deepEqual(transfer.data, {"172": 1});
-			assert.equal(transfer.totalPrice, 1.44999);
-		});
-	});
-
-	describe("bundleSale()", function () {
-		it("should return the correct data for a bundle sale", async function () {
-			const details = await handleCurioTransfer({
-				transactionHash: '0x2ff57b685cab693d9123c2b5ab0a08d5597faab5e3a76e0adc87cc93634f0ede'
-			})
-			assert.deepEqual(details.data, {"10": 1, "12": 1, "15": 1})
-			assert.equal(details.totalPrice, 0.05)
-			assert.equal(details.token, "ETH")
-		})
-	})
-
-	describe("handleNFTXSales()", function () {
-		it("should return the correct data for a NFTX sale (sushiswap)", async function () {
-			const details = await handleCurioTransfer({
-				transactionHash: '0xdc2f0dfc73e4e0f03ed1819b0ba936a35fd44c4f6812da538a681214589dc5f4'
-			})
-
-			assert.equal(details.qty, 0);
-			assert.equal(details.card, 0);
-			assert.equal(details.totalPrice, 0);
-		})
-	})
-
-	describe("handleOpenSeaSales()", function () {
-		it("should return the correct numbers for an ETH sale", async function () {
-			const details = await handleCurioTransfer({
-				transactionHash: '0xa87070b789b671f9cdc2abe85dc09b11b7548e3cdb7e9e89916c96e585f8d039'
-			})
-
-			assert.equal(details.token, "ETH");
-			assert.equal(details.totalPrice, "0.5");
-		})
-
-		it("should return the correct numbers for a WETH sale", async function () {
-			const details = await handleCurioTransfer({
-				transactionHash: '0xe0e164a2dd03d1182e5cc8247a398a137996eee5c8be32577e88419d505a3fef'
-			})
-
-			assert.equal(details.token, "WETH");
-			assert.equal(details.totalPrice, "0.371");
-		})
-
-		it("should return the correct numbers for an USDC sale", async function () {
-			const details = await handleCurioTransfer({
-				transactionHash: '0x020dd8b60a00665c5c0dbbfca67d2e0ed2c7d678eb641d9fa42cd8bd7f2352d4'
-			})
-
-			assert.equal(details.token, "USDC");
-			assert.equal(details.totalPrice, "27777.0");
-
+			const details = await handlePeperiumTransfer(events[0])
+			assert.deepEqual(details.data, {"29": 1})
+			assert.equal(details.totalPrice, 0.38);
 		});
 	});
 
 	describe("handleSeaportSales()", function() {
 		it("should return the correct numbers for an ETH sale", async function () {
-			const details = await handleCurioTransfer({
-				transactionHash: '0x6c4f3f7a1ee7bccf446bf65f87b342160d8065658ac0e36a07f6c175464ea2f3'
+			const details = await handlePeperiumTransfer({
+				transactionHash: '0x6eee954815383d963c92a6ec49614ed2b8e11e54454f02ebddb1745dcd3bf89b'
 			})
 
+			assert.deepEqual(details.data, {"29": 1})
 			assert.equal(details.token, "ETH");
-			assert.equal(details.totalPrice, "0.49999");
+			assert.equal(details.totalPrice, "0.2999");
 		})
 
 		it("should return the correct numbers for a WETH sale", async function () {
-			const details = await handleCurioTransfer({
-				transactionHash: '0xa0f3e19e03db8c9286742529828dde8d17d16935b3dbfb34826fcad6ecd2f145'
+			const details = await handlePeperiumTransfer({
+				transactionHash: '0xb065d78c206e3deda3393ce92f9968d7fd3eeb1a9d59698648fec27d43d8e64a'
 			})
 
+			// 8 decimals so 1 equals 100000000
+			assert.deepEqual(details.data, {"99": 100000000})
 			assert.equal(details.token, "WETH");
-			assert.equal(details.totalPrice, "0.32");
-		})
-	})
-
-	describe("handleLooksRareSales()", function () {
-		it("should return the correct numbers for a WETH sale", async function () {
-			const details = await handleCurioTransfer({
-				transactionHash: '0xe1f9c0f3b55d277da8f72a95c1e98ff023272c59acdc929e878e9c524647e429'
-			})
-
-			assert.equal(details.token, "WETH");
-			assert.equal(details.totalPrice, "19.25");
+			assert.equal(details.totalPrice, "0.6777");
 		})
 	})
 
@@ -131,5 +52,5 @@ describe("Watcher", function () {
 
 			assert.equal(username, "0xbeb...526");
 		});
-	});
+	});	
 });

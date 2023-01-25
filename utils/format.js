@@ -3,19 +3,60 @@ const { getUsername } = require('./opensea')
 
 const getImageURL = _card => {
 	const card = parseInt(_card)
-	let cardURL = ''
+	let cardExt = ''
 
-	if (card <= 9) {
-		cardURL = `0${card}.jpg`
-	} else if (card == 21 || card == 22 || card == 172) {
-		cardURL = `${card}.png`
-	} else if (card == 23 || card == 30) {
-		cardURL = `${card}.gif`
+	if ([18,24].includes(card)) {
+		return `artwork/UNKNOWN.png`
+	} else if (card === 99) {
+		return `artwork/TAOWARARE.jpg`
+	} else if ([1,4,8,10,11,12,13,14,15,16,17,22,23,26,30].includes(card)) {
+		cardExt = `.png`
+	} else if ([20,31].includes(card)) {
+		cardExt = `.gif`
 	} else {
-		cardURL = `${card}.jpg`
+		cardExt = `.jpg`
 	}	
 
-	return cardURL
+	return `ipfs/${getCardName(card)}${cardExt}`
+}
+
+const getCardName = _card => {
+	let cards = []
+
+	cards[1] = 'KFPEPE'
+	cards[2] = 'PEPESTREET'
+	cards[3] = 'ZENPEPE'
+	cards[4] = 'PEPRESSIONISM'
+	cards[5] = 'PEPEBANKSY'
+	cards[6] = 'MONAPEPE'
+	cards[7] = 'LORDRARE'
+	cards[8] = 'BASEBALLPEPE'
+	cards[9] = 'BATPEPE'
+	cards[10] = 'HOTDOGPEPE'
+	cards[11] = 'KINGRARE'
+	cards[12] = 'ACCEPTRARE'
+	cards[13] = 'NEVERENDINGPEPE'
+	cards[14] = 'PEPEGOD'
+	cards[15] = 'PEPEGOLD'
+	cards[16] = 'NEWPEPE'
+	cards[17] = 'PEPETTE'
+	cards[18] = 'VAPORPEPE'
+	cards[19] = 'PEPESTENCIL'
+	cards[20] = 'GlitchPepe'
+	cards[21] = 'PEPERIUMCLASSIC'
+	cards[22] = 'CHILLPEPE'
+	cards[23] = 'RUINSOFPEPE'
+	cards[24] = 'GIGERPEPECITY'
+	cards[25] = 'PEPEZEUSLIGHT'
+	cards[26] = 'CRIMEANDPEPESHMENT'
+	cards[27] = 'PEPENEMSTEAK'
+	cards[28] = 'RPALPHASTIK'
+	cards[29] = 'UNDEADPEPE'
+	cards[30] = 'MHV'
+	cards[31] = 'PBJCAT'
+	cards[99] = 'TAOWARARE'
+
+	return cards[parseInt(_card)]
 }
 
 // style = currency to include dollar sign
@@ -33,24 +74,20 @@ const formatDiscordMessage = async ({ data, totalPrice, buyer, seller, ethPrice,
 	
 	let quantities = []
 	for (const [card, qty] of Object.entries(data)) {
-		if (card == "172") {
-			quantities.push(`${qty}x CRO17b (misprint)`);
-		} else {
-			quantities.push(`${qty}x CRO${card}`);
-		}
+		quantities.push(`${qty}x ${getCardName(card)}`);
 	}
 	const cards = Object.keys(data);
 	const card = cards[0];
 
-	const contract = (card == "172") ? "0x04AfA589E2b933f9463C5639f412b183Ec062505" : "0x73DA73EF3a6982109c4d5BDb0dB9dd3E3783f313";
+	const contract = "0xfe880206214856f984d4f64fc89c26681dca15a2";
 	const url = 
 		platforms[0] === 'LooksRare'
 		? `https://looksrare.org/collections/${contract}/${card}`
-		: `https://opensea.io/assets/${contract}/${card}`;
+		: `https://opensea.io/assets/ethereum/${contract}/${card}`;
 	let fields = [
 		{
 			name: 'Quantity',
-			value: quantities.join(", "),
+			value: quantities.join("\n"),
 			inline: true,
 		},
 		{
@@ -62,16 +99,9 @@ const formatDiscordMessage = async ({ data, totalPrice, buyer, seller, ethPrice,
 
 	let title = "";
 	if (cards.length > 1) {
-		if(cards.includes("172")) {
-			cards.splice(cards.indexOf("172"), 1, "CRO17b (misprint)");
-		}
-		title = `Curios ${cards.join(", ")} have been sold`;
+		title = `Multiple cards bought`;
 	} else {
-		if (card == "172") {
-			title = "Curio 17b (misprint) has been sold";
-		} else {
-			title = `Curio ${card} has been sold`;
-		}
+		title = `${getCardName(card)}`;
 	}
 
 	if(['ETH', 'WETH'].includes(token)) {
@@ -82,18 +112,14 @@ const formatDiscordMessage = async ({ data, totalPrice, buyer, seller, ethPrice,
 		})
 	}
 	return {
-		username: 'CurioCard Sales',
+		username: 'Peperium Sales',
 		embeds: [
 			{
-				author: {
-					name: 'Curio Cards',
-					icon_url: 'https://www.gitbook.com/cdn-cgi/image/width=40,height=40,fit=contain,dpr=1,format=auto/https%3A%2F%2F1770801706-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fcollections%252FNyUEXr2B4FBefalwZTqb%252Ficon%252FAbV65JUMTbXuuBMe9I0M%252Favatar2.png%3Falt%3Dmedia%26token%3D99ceb163-5bff-440c-a5b4-83ac5ffc4d1a'
-				},
 				title: title,
 				description: `${platforms.length > 1 ? "Platforms" : "Platform"}: **${platforms.join(", ")}**\nBuyer: **${buyerUsername}**\nSeller: **${sellerUsername}**\n---------------------------------`,
 				url,
 				thumbnail: {
-					url: `https://fafrd.github.io/curio-gallery/images/${getImageURL(card)}`
+					url: `https://crypt0biwan.github.io/peperium-website/assets/${getImageURL(card)}`
 				},
 				color: COLORS.GREEN,
 				fields,
@@ -133,20 +159,13 @@ const formatTwitterMessage = async (twitterClient, { data, totalPrice, buyer, se
 		if (cardCount > 1) {
 			qtyString = `${cardCount}x `;
 		}
-		if (cardNum == "172") {
-			twitterMessage = `${qtyString}Curio Card 17b (misprint) sold for ${totalPriceString} ${token} ${totalPriceUsdString}${platformString}\n\nhttps://opensea.io/assets/0x04AfA589E2b933f9463C5639f412b183Ec062505/${cardNum}`;
-		} else {
-			twitterMessage = `${qtyString}Curio Card ${cardNum} sold for ${totalPriceString} ${token} ${totalPriceUsdString}${platformString}\n\nhttps://opensea.io/assets/0x73DA73EF3a6982109c4d5BDb0dB9dd3E3783f313/${cardNum}`;
-		}
+
+		twitterMessage = `${qtyString}${getCardName(cardNum)} bought for ${totalPriceString} ${token} ${totalPriceUsdString}${platformString}\n\nhttps://opensea.io/assets/ethereum/0xfe880206214856f984d4f64fc89c26681dca15a2/${cardNum}`;
 
 		mediaIds = [await uploadMedia(twitterClient, cardNum)];
 	} else {
 		let qtyString = Object.entries(data).map(q => {
-			if(q[0] == "172") {
-				return `${q[1]}x Curio 17b (misprint)`;
-			} else {
-				return `${q[1]}x Curio ${q[0]}`;
-			}
+			return `${q[1]}x ${getCardName(q[0])}`;
 		}).join('\n');
 
 		let totalPriceUsdString = "";
@@ -156,7 +175,7 @@ const formatTwitterMessage = async (twitterClient, { data, totalPrice, buyer, se
 
 		const cardNums = Object.keys(data).slice(0, 4);
 
-		twitterMessage = `Multiple Curio Cards sold for a total of ${totalPriceString} ${token} ${totalPriceUsdString}!\n${qtyString}`;
+		twitterMessage = `Multiple cards sold for a total of ${totalPriceString} ${token} ${totalPriceUsdString}!\n${qtyString}`;
 		mediaIds = await Promise.all(cardNums.map(card => uploadMedia(twitterClient, card)));
 	}
 
@@ -164,6 +183,7 @@ const formatTwitterMessage = async (twitterClient, { data, totalPrice, buyer, se
 }
 
 module.exports = exports = {
+	getCardName,
 	formatDiscordMessage,
 	formatTwitterMessage,
 }
