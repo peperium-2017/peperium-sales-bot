@@ -33,8 +33,7 @@ describe("Watcher", function () {
 				transactionHash: '0xb065d78c206e3deda3393ce92f9968d7fd3eeb1a9d59698648fec27d43d8e64a'
 			})
 
-			// 8 decimals so 1 equals 100000000
-			assert.deepEqual(details.data, {"99": 100000000})
+			assert.deepEqual(details.data, {"99": 1})
 			assert.equal(details.token, "WETH");
 			assert.equal(details.totalPrice, "0.6777");
 		})

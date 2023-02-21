@@ -2,6 +2,7 @@ const Ethers = require("ethers");
 require('dotenv').config()
 const { INFURA_PROJECT_ID, INFURA_SECRET } = process.env
 const { getCardName } = require('./format')
+const { getAmount } = require('./cards')
 
 // set up provider
 const provider = new Ethers.providers.InfuraProvider("homestead", {
@@ -184,7 +185,7 @@ async function handlePeperiumTransfer(tx) {
 		if (!data[card]) {
 			data[card] = 0;
 		}
-		data[card] += qty
+		data[card] += getAmount(card, qty)
 
 	}
 	seller = (sellers.every((val, i, arr) => val === arr[0])) ? sellers[0] : seller = "Multiple" // Check if multiple sellers, if so, seller is "Multiple" instead of a single seller

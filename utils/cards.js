@@ -34,4 +34,15 @@ images['PBJCAT'] = 'QmYShHHTU87siNdNjy8wbb6Stnx5XFMF8uzwuHfCJHUBYm'
 
 images['TAOWARARE'] = 'QmWVGD3uU9u7S5KKgt7KRmEEzGRKpMxsK5AxGrA3kw1kL5'
 
-module.exports = exports = images
+const getAmount = (cardId, amount) => {
+    if(cardId === '99') {
+        return amount / 10 ** 8
+    }
+
+    return amount
+}
+
+module.exports = exports = {
+    getAmount,
+    images
+}
