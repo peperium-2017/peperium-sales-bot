@@ -12,25 +12,27 @@ const {
 const ENABLE_DISCORD = DISCORD_ID !== ''
 const ENABLE_TWITTER = TWITTER_API_KEY !== ''
 
+let discordClient, _twitterClient, twitterClient
+
 if(ENABLE_DISCORD) {
-	const webhookClient = new WebhookClient({id: DISCORD_ID, token: DISCORD_TOKEN});
+	discordClient = new WebhookClient({id: DISCORD_ID, token: DISCORD_TOKEN});
 }
 
 if(ENABLE_TWITTER) {
-	const _twitterClient = new TwitterApi({
+	_twitterClient = new TwitterApi({
 		appKey: TWITTER_API_KEY,
 		appSecret: TWITTER_API_KEY_SECRET,
 		accessToken: TWITTER_ACCESS_TOKEN_KEY,
 		accessSecret: TWITTER_ACCESS_TOKEN_SECRET
 	});
-	const twitterClient = _twitterClient.readWrite;
+	twitterClient = _twitterClient.readWrite;
 }
 
 const transferHandler = async ({ data, totalPrice, buyer, seller, ethPrice, token, platforms }) => {
 	if(ENABLE_DISCORD) {
 		// post to discord
 		const discordMsg = await formatDiscordMessage({ data, totalPrice, buyer, seller, ethPrice, token, platforms });
-		webhookClient.send(discordMsg).catch(console.error);
+		discordClient.send(discordMsg).catch(console.error);
 	}
 
 	if(ENABLE_TWITTER) {
