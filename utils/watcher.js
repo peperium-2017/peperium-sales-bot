@@ -207,7 +207,7 @@ function watchForTransfers(transferHandler) {
 
 	provider.on(peperiumEventFilter, async (log) => {
 		try {
-			const transfer = await handleCurioTransfer(log);
+			const transfer = await handlePeperiumTransfer(log);
 			if (transfer.data) {
 				transferHandler(transfer);
 			}
