@@ -39,6 +39,17 @@ describe("Watcher", function () {
 		})
 	})
 
+	describe("handleSeaport_1_5_Sales()", function() {
+		it("should return the correct numbers for an ETH sale", async function () {
+			const details = await handlePeperiumTransfer({
+				transactionHash: '0x5735015d88c354f1345c4a61fb3139cadc53840b92b6bb02a1013f543f0db8a8'
+			})
+
+			assert.equal(details.token, "ETH");
+			assert.equal(details.totalPrice, "1.3299999999999998");
+		})
+	})
+
 	describe("getOpenseaUsername()", function () {
 		it("should correctly find the username corresponding to ETH address 0x49468f702436d1e590895ffa7155bcd393ce52ae", async function () {
 			const username = await getUsername("0x49468f702436d1e590895ffa7155bcd393ce52ae");

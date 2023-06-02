@@ -19,8 +19,9 @@ const erc20TokenAbi = require("../abis/ERC20Token.json");
 
 const OPENSEA_SEAPORT_CONTRACT_1_2 = "0x00000000006c3852cbef3e08e8df289169ede581"
 const OPENSEA_SEAPORT_CONTRACT_1_4 = "0x00000000000001ad428e4906ae43d8f9852d0dd6"
+const OPENSEA_SEAPORT_CONTRACT_1_5 = "0x00000000000000adc04c56bf30ac9d3c0aaf14dc"
 const seaportAbi = require("../abis/SeaPort.json");
-const seaportContract = new Ethers.Contract(OPENSEA_SEAPORT_CONTRACT_1_4, seaportAbi, provider);
+const seaportContract = new Ethers.Contract(OPENSEA_SEAPORT_CONTRACT_1_5, seaportAbi, provider);
 
 const PEPERIUM_WRAPPER_CONTRACT = "0xfe880206214856f984d4f64fc89c26681dca15a2";
 const peperiumAbi = require("../abis/PeperiumERC1155Wrapper.json");
@@ -63,7 +64,7 @@ async function handlePeperiumTransfer(tx) {
 	});
 
 	let seaportLogRaw = txReceipt.logs.filter(x => {
-		return [OPENSEA_SEAPORT_CONTRACT_1_2, OPENSEA_SEAPORT_CONTRACT_1_4].includes(x.address.toLowerCase())
+		return [OPENSEA_SEAPORT_CONTRACT_1_2, OPENSEA_SEAPORT_CONTRACT_1_4, OPENSEA_SEAPORT_CONTRACT_1_5].includes(x.address.toLowerCase())
 	});
 
 	let looksRareLogRaw = txReceipt.logs.filter(x => {
@@ -200,6 +201,10 @@ async function handlePeperiumTransfer(tx) {
 }
 
 function watchForTransfers(transferHandler) {
+	provider.on("block", (blockNumber) => {
+		console.log("new block: " + blockNumber)
+	});
+
 	provider.on(peperiumEventFilter, async (log) => {
 		try {
 			const transfer = await handleCurioTransfer(log);
