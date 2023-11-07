@@ -5,13 +5,11 @@ const getImageURL = _card => {
 	const card = parseInt(_card)
 	let cardExt = ''
 
-	if ([18,24].includes(card)) {
-		return `artwork/UNKNOWN.png`
-	} else if (card === 99) {
+	if (card === 99) {
 		return `artwork/TAOWARARE.jpg`
 	} else if ([1,4,8,10,11,12,13,14,15,16,17,22,23,26,30].includes(card)) {
 		cardExt = `.png`
-	} else if ([20,31].includes(card)) {
+	} else if ([18,20,31].includes(card)) {
 		cardExt = `.gif`
 	} else {
 		cardExt = `.jpg`
@@ -119,7 +117,7 @@ const formatDiscordMessage = async ({ data, totalPrice, buyer, seller, ethPrice,
 				description: `${platforms.length > 1 ? "Platforms" : "Platform"}: **${platforms.join(", ")}**\nBuyer: **${buyerUsername}**\nSeller: **${sellerUsername}**\n---------------------------------`,
 				url,
 				thumbnail: {
-					url: `https://crypt0biwan.github.io/peperium-website/assets/${getImageURL(card)}`
+					url: `https://raw.githubusercontent.com/crypt0biwan/peperium-sales-bot/main/images/${getImageURL(card)}`
 				},
 				color: COLORS.GREEN,
 				fields,
