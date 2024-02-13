@@ -2,6 +2,7 @@ const { WebhookClient } = require('discord.js');
 const { TwitterApi } = require('twitter-api-v2');
 const { watchForTransfers } = require('./utils/watcher');
 const { formatDiscordMessage, formatTwitterMessage } = require('./utils/format');
+const { openSeaClient } = require('./utils/opensea')
 
 require('dotenv').config();
 const {
@@ -31,7 +32,7 @@ if(ENABLE_TWITTER) {
 const transferHandler = async ({ data, totalPrice, buyer, seller, ethPrice, token, platforms }) => {
 	if(ENABLE_DISCORD) {
 		// post to discord
-		const discordMsg = await formatDiscordMessage({ data, totalPrice, buyer, seller, ethPrice, token, platforms });
+		const discordMsg = await formatDiscordMessage(openSeaClient, { data, totalPrice, buyer, seller, ethPrice, token, platforms });
 		discordClient.send(discordMsg).catch(console.error);
 	}
 

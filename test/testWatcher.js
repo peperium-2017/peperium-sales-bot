@@ -3,6 +3,28 @@ const { getUsername } = require("../utils/opensea");
 
 const assert = require("assert");
 
+const mockOpenSeaClient = (address) => {
+	return new Promise((resolve, reject) => {
+		if (address == "0x49468f702436d1e590895ffa7155bcd393ce52ae")
+			resolve({
+				data: {
+					username: "mockUsername",
+					account: {
+						user: {
+							username: "mockUsername"
+						}
+					}
+				}
+			});
+		else
+			resolve({
+				data: {
+					username: null,
+				}
+			});
+	});
+}
+
 describe("Watcher", function () {
 	this.timeout(10_000);
 
@@ -48,17 +70,27 @@ describe("Watcher", function () {
 			assert.equal(details.token, "ETH");
 			assert.equal(details.totalPrice, "1.3299999999999998");
 		})
+
+		it("should return the correct numbers for a WETH sale", async function() {
+			const details = await handlePeperiumTransfer({
+				transactionHash: '0x0932563458a9b95aaf5b5bd9ab813d10558dd0d892b05103c4b75b6cd1b47d40'
+			})
+
+			assert.deepEqual(details.data, {"20": 1})
+			assert.equal(details.token, "WETH")
+			assert.equal(details.totalPrice, "0.1")
+		})		
 	})
 
 	describe("getOpenseaUsername()", function () {
 		it("should correctly find the username corresponding to ETH address 0x49468f702436d1e590895ffa7155bcd393ce52ae", async function () {
-			const username = await getUsername("0x49468f702436d1e590895ffa7155bcd393ce52ae");
+			const username = await getUsername(mockOpenSeaClient, "0x49468f702436d1e590895ffa7155bcd393ce52ae");
 
-			assert.equal(username, "crypt0biwan");
+			assert.equal(username, "mockUsername");
 		});
 
 		it("should correctly return a formatted ETH address when there's no username available", async function () {
-			const username = await getUsername("0xbebf173c83ad4c877c04592de0c38567abf66526");
+			const username = await getUsername(mockOpenSeaClient, "0xbebf173c83ad4c877c04592de0c38567abf66526");
 
 			assert.equal(username, "0xbeb...526");
 		});

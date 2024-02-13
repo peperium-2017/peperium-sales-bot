@@ -9,6 +9,39 @@ const mockTwitterClient = {
 	}
 }
 
+const mockOpenSeaClient = (address) => {
+	return new Promise((resolve, reject) => {
+		if (address == "0x6fa4b81c3d7df392432bb568e648794aa69885d6")
+			resolve({
+				data: {
+					username: "mockUsername",
+					account: {
+						user: {
+							username: "mockUsername"
+						}
+					}
+				}
+			});
+		else if (address == "0xf508d9916cb4c0e02bce766d580c15bea1090f08")
+			resolve({
+				data: {
+					username: "mockUsername2",
+					account: {
+						user: {
+							username: "mockUsername2"
+						}
+					}
+				}
+			});
+		else
+			resolve({
+				data: {
+					username: null,
+				}
+			});
+	});
+}
+
 const assert = require("assert");
 
 const singleSale = {
@@ -26,12 +59,12 @@ describe("Formatter", function () {
 
 	describe("formatDiscordMessage()", function () {
 		it("should format single sales correctly", async function () {
-			const discordMsg = await formatDiscordMessage(singleSale);
+			const discordMsg = await formatDiscordMessage(mockOpenSeaClient, singleSale);
 
 			assert.equal(discordMsg.username, 'Peperium Sales')
 			assert.equal(discordMsg.embeds[0].title, 'UNDEADPEPE')
-			assert.equal(discordMsg.embeds[0].description, 'Platform: **OpenSea**\nBuyer: **Skyjuice**\nSeller: **Lamborghinis**\n---------------------------------')
-			assert.equal(discordMsg.embeds[0].thumbnail.url, 'https://crypt0biwan.github.io/peperium-website/assets/ipfs/UNDEADPEPE.jpg')
+			assert.equal(discordMsg.embeds[0].description, 'Platform: **OpenSea**\nBuyer: **mockUsername**\nSeller: **mockUsername2**\n---------------------------------')
+			assert.equal(discordMsg.embeds[0].thumbnail.url, 'https://raw.githubusercontent.com/crypt0biwan/peperium-sales-bot/main/images/ipfs/UNDEADPEPE.jpg')
 			assert.equal(discordMsg.embeds[0].color, '0x4bea1d')
 			assert.deepEqual(discordMsg.embeds[0].fields[0], {
 				"name": "Quantity",
