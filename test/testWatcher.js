@@ -82,6 +82,18 @@ describe("Watcher", function () {
 		})		
 	})
 
+	describe("handleSeaport_1_6_Sales()", function() {
+		it("should return the correct numbers for a USDC sale", async function () {
+			const details = await handlePeperiumTransfer({
+				transactionHash: '0x4ceb8eeb86afc032bb92e705f21191e4528afc2cc26e42e42f1eecd09621f301'
+			})
+
+			assert.deepEqual(details.data, {"28": 1})
+			assert.equal(details.token, "USDC")
+			assert.equal(details.totalPrice, "1200")
+		})
+	})
+
 	describe("getOpenseaUsername()", function () {
 		it("should correctly find the username corresponding to ETH address 0x49468f702436d1e590895ffa7155bcd393ce52ae", async function () {
 			const username = await getUsername(mockOpenSeaClient, "0x49468f702436d1e590895ffa7155bcd393ce52ae");
